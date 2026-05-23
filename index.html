@@ -185,9 +185,20 @@
         <div class="timer" id="timer-display">05:00</div>
         
         <div class="memory-text" id="target-text">
-            <p id="line-1">Some moments are never meant to stay.</p>
+            <p id="line-1">
+                There is a version of this evening<br>
+                I have replayed a thousand times —<br>
+                the way the light caught your eyes,<br>
+                the pause before you smiled,<br>
+                the exact warmth of that one moment<br>
+                when the whole world quietly stepped back<br>
+                and left only you and me in it.
+            </p>
             <br>
-            <p id="line-2">I wanted this moment to last longer.</p>
+            <p id="line-2">
+                I wanted to live inside that feeling forever.<br>
+                I still do.
+            </p>
         </div>
 
         <div class="timestamp" id="real-time"></div>
@@ -195,7 +206,8 @@
 
     <!-- Final State -->
     <div class="final-message" id="final-message">
-        Even if this disappears, my feelings won't.
+        Even if this disappears — you won't.<br>
+        <span style="font-size:16px; opacity:0.6; letter-spacing:1px;">Not from me. Not ever.</span>
     </div>
 
     <script>
@@ -351,7 +363,7 @@
             if (phase === 3) {
                 // Irreversibly drop sentence
                 setTimeout(() => {
-                    line2.innerText = "I wanted this...";
+                    line2.innerText = "I wanted to live inside that feeling...";
                 }, 2000);
                 setTimeout(() => {
                     line2.remove(); // Removed from DOM permanently
