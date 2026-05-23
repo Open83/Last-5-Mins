@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --text-glow: rgba(255, 255, 255, 0.8);
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-glow);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background-color 2s ease, filter 2s ease;
+        }
+
+        /* ----------------------------------------------------
+           UI Elements
+           ---------------------------------------------------- */
+        #intro-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            z-index: 100;
+            transition: opacity 2s ease;
+        }
+
+        #enter-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 12px 24px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        #enter-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        #experience-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 60vh;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 3s forwards 1s;
+        }
+
+        .timer {
+            font-family: var(--font-mono);
+            font-size: 18px;
+            letter-spacing: 4px;
+            opacity: 0.5;
+            transition: all 1s ease;
+        }
+
+        .memory-text {
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1.6;
+            letter-spacing: 1px;
+            transition: all 0.5s ease;
+        }
+
+        .timestamp {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            opacity: 0.3;
+        }
+
+        .final-message {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            opacity: 0;
+        }
+
+        /* ----------------------------------------------------
+           Decay Phases & Animations
+           ---------------------------------------------------- */
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            5% { opacity: 0.8; }
+            10% { opacity: 1; }
+            15% { opacity: 0.3; }
+            20% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+        @keyframes jitter {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-1px, 1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        /* Phase 2: Small Changes */
+        body[data-phase="2"] .memory-text {
+            animation: flicker 8s infinite alternate;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Phase 3: Decay Begins */
+        body[data-phase="3"] .memory-text {
+            animation: flicker 3s infinite, jitter 2s infinite;
+            filter: blur(1px);
+        }
+        body[data-phase="3"] .timer {
+            opacity: 0.2;
+            letter-spacing: 8px;
+        }
+
+        /* Phase 4: Panic */
+        body[data-phase="4"] {
+            background-color: #050505;
+        }
+        body[data-phase="4"] .memory-text {
+            animation: flicker 0.5s infinite, jitter 0.2s infinite;
+            filter: blur(3px);
+            color: rgba(255, 255, 255, 0.4);
+            transform: scale(0.98);
+        }
+        body[data-phase="4"] .timer {
+            animation: jitter 0.1s infinite;
+            color: red;
+            opacity: 0.5;
+        }
+
+        /* Phase 5: The End */
+        body[data-phase="5"] #experience-container {
+            display: none !important; /* Force hide main UI */
+        }
+        body[data-phase="5"] .final-message {
+            display: flex;
+            animation: fadeIn 2s forwards;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Gateway -->
+    <div id="intro-screen">
+        <button id="enter-btn">Initiate Memory</button>
+    </div>
+
+    <!-- Main Experience -->
+    <div id="experience-container">
+        <div class="timer" id="timer-display">05:00</div>
+        
+        <div class="memory-text" id="target-text">
+            <p id="line-1">Some moments are never meant to stay.</p>
+            <br>
+            <p id="line-2">I wanted this moment to last longer.</p>
+        </div>
+
+        <div class="timestamp" id="real-time"></div>
+    </div>
+
+    <!-- Final State -->
+    <div class="final-message" id="final-message">
+        Even if this disappears, my feelings won't.
+    </div>
+
+    <script>
+        /** 
+         * CONFIGURATION
+         */
+        const TOTAL_MINUTES = 0.5;
+        const LIFESPAN_MS = TOTAL_MINUTES * 60 * 1000; 
+
+        // Define phase thresholds as percentages of total lifespan
+        const PHASE_THRESHOLDS = {
+            2: 0.20, // 20% in (1 min)
+            3: 0.40, // 40% in (2 min)
+            4: 0.70, // 70% in (3.5 min)
+            5: 0.90  // 90% in (4.5 min)
+        };
+
+        let currentPhase = 1;
+        let animationFrameId;
+        
+        // Audio globals
+        let audioCtx, oscillator, gainNode;
+
+        // Elements
+        const introScreen = document.getElementById('intro-screen');
+        const enterBtn = document.getElementById('enter-btn');
+        const experienceContainer = document.getElementById('experience-container');
+        const timerDisplay = document.getElementById('timer-display');
+        const line2 = document.getElementById('line-2');
+        const realTime = document.getElementById('real-time');
+
+        // Capture real creation time
+        const now = new Date();
+        realTime.innerText = `Created: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+        /**
+         * INITIALIZATION & AUDIO
+         */
+        enterBtn.addEventListener('click', () => {
+            introScreen.style.opacity = '0';
+            setTimeout(() => {
+                introScreen.remove();
+                experienceContainer.style.display = 'flex';
+                initAudio();
+                startExperience();
+                requestWakeLock();
+            }, 2000);
+        });
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+
+            // Create a low, ambient drone
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 65; // Deep hum
+            
+            // Start quiet
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 5);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock denied:', err);
+            }
+        }
+
+        /**
+         * CORE TIMELINE LOGIC
+         */
+        function startExperience() {
+            let startTime = localStorage.getItem('memory_epoch');
+
+            if (!startTime) {
+                startTime = Date.now();
+                localStorage.setItem('memory_epoch', startTime);
+            } else {
+                startTime = parseInt(startTime, 10);
+            }
+
+            loop(startTime);
+        }
+
+        function loop(startTime) {
+            const elapsedMs = Date.now() - startTime;
+            const remainingMs = LIFESPAN_MS - elapsedMs;
+
+            if (remainingMs <= 0) {
+                executeDeathState();
+                return; 
+            }
+
+            updateUI(remainingMs, elapsedMs);
+            animationFrameId = requestAnimationFrame(() => loop(startTime));
+        }
+
+        /**
+         * UI & CORRUPTION UPDATES
+         */
+        function updateUI(remainingMs, elapsedMs) {
+            // 1. Update Timer
+            const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const s = String(totalSeconds % 60).padStart(2, '0');
+            
+            // In panic phase, timer glitches visually
+            if (currentPhase === 4 && Math.random() > 0.8) {
+                timerDisplay.innerText = `${m}:${String(Math.floor(Math.random() * 99)).padStart(2, '0')}`;
+            } else {
+                timerDisplay.innerText = `${m}:${s}`;
+            }
+
+            // 2. Evaluate Phase
+            const progress = elapsedMs / LIFESPAN_MS;
+            let newPhase = 1;
+            
+            if (progress >= PHASE_THRESHOLDS[5]) newPhase = 5;
+            else if (progress >= PHASE_THRESHOLDS[4]) newPhase = 4;
+            else if (progress >= PHASE_THRESHOLDS[3]) newPhase = 3;
+            else if (progress >= PHASE_THRESHOLDS[2]) newPhase = 2;
+
+            if (newPhase !== currentPhase) {
+                currentPhase = newPhase;
+                document.body.setAttribute('data-phase', currentPhase);
+                triggerPhaseEvents(currentPhase);
+            }
+
+            // 3. Continuous Audio Deterioration
+            if (audioCtx && progress > PHASE_THRESHOLDS[2]) {
+                // Drop frequency slowly to sound unstable
+                const baseFreq = 65;
+                const drop = (progress * 20);
+                oscillator.frequency.setTargetAtTime(baseFreq - drop, audioCtx.currentTime, 0.1);
+                
+                // Add volume stutter in phase 4
+                if (currentPhase === 4 && Math.random() > 0.9) {
+                    gainNode.gain.setTargetAtTime(Math.random() * 0.1, audioCtx.currentTime, 0.05);
+                }
+            }
+        }
+
+        function triggerPhaseEvents(phase) {
+            if (phase === 3) {
+                // Irreversibly drop sentence
+                setTimeout(() => {
+                    line2.innerText = "I wanted this...";
+                }, 2000);
+                setTimeout(() => {
+                    line2.remove(); // Removed from DOM permanently
+                }, 8000);
+            }
+            if (phase === 5) {
+                // Fade out audio entirely
+                if (gainNode) {
+                    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
+                    setTimeout(() => audioCtx.close(), 3500);
+                }
+                
+                // Final script sequence before absolute death
+                setTimeout(() => {
+                    const fm = document.getElementById('final-message');
+                    fm.style.opacity = '0';
+                    setTimeout(() => fm.remove(), 2000);
+                }, 8000); // Leaves a few seconds of pure black before system halt
+            }
+        }
+
+        /**
+         * THE DEATH STATE
+         */
+        function executeDeathState() {
+            cancelAnimationFrame(animationFrameId);
+            if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
+
+            document.body.innerHTML = '';
+            document.body.className = '';
+            document.body.style.backgroundColor = '#000000';
+            document.body.style.margin = '0';
+            document.body.style.height = '100vh';
+            document.body.style.display = 'flex';
+            document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
+
+            const voidMsg = document.createElement('div');
+            voidMsg.style.color = 'rgba(255, 255, 255, 0.1)';
+            voidMsg.style.fontFamily = "monospace";
+            voidMsg.style.fontSize = "10px";
+            voidMsg.style.textTransform = "uppercase";
+            voidMsg.innerText = 'Memory Expired';
+            
+            document.body.appendChild(voidMsg);
+        }
+    </script>
+</body>
+</html>
