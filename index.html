@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #000000;
-            --text-glow: rgba(255, 255, 255, 0.8);
-            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            --font-mono: 'Courier New', Courier, monospace;
+            --text-glow: rgba(255, 255, 255, 0.85);
+            --font-main: 'Cormorant Garamond', 'Georgia', serif;
+            --font-mono: 'Courier Prime', 'Courier New', monospace;
         }
 
         * {
@@ -18,11 +19,18 @@
             padding: 0;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+            overscroll-behavior: none;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--text-glow);
             font-family: var(--font-main);
-            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -30,11 +38,11 @@
             transition: background-color 2s ease, filter 2s ease;
         }
 
-        /* ----------------------------------------------------
-           UI Elements
-           ---------------------------------------------------- */
+        /* ----------------------------------------
+           INTRO SCREEN
+        ---------------------------------------- */
         #intro-screen {
-            position: absolute;
+            position: fixed;
             inset: 0;
             display: flex;
             flex-direction: column;
@@ -43,117 +51,214 @@
             background: #000;
             z-index: 100;
             transition: opacity 2s ease;
+            padding: 20px;
+            text-align: center;
+            gap: 16px;
+        }
+
+        #intro-title {
+            font-size: clamp(11px, 3vw, 13px);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.25;
+            font-family: var(--font-mono);
+            margin-bottom: 8px;
         }
 
         #enter-btn {
             background: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.6);
-            padding: 12px 24px;
-            font-size: 14px;
-            letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: rgba(255, 255, 255, 0.55);
+            padding: clamp(10px, 3vw, 14px) clamp(20px, 6vw, 30px);
+            font-size: clamp(11px, 3vw, 13px);
+            letter-spacing: 3px;
             cursor: pointer;
             text-transform: uppercase;
-            transition: all 0.3s ease;
+            font-family: var(--font-mono);
+            transition: all 0.4s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        #enter-btn:hover {
+        #enter-btn:hover,
+        #enter-btn:active {
             color: #fff;
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 18px rgba(255,255,255,0.12);
         }
 
+        /* ----------------------------------------
+           EXPERIENCE CONTAINER
+        ---------------------------------------- */
         #experience-container {
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            height: 60vh;
-            width: 80%;
-            max-width: 600px;
+            width: 90%;
+            max-width: 640px;
+            min-height: 80vh;
+            min-height: 80dvh;
+            padding: clamp(20px, 6vh, 50px) 0;
             text-align: center;
             opacity: 0;
-            animation: fadeIn 3s forwards 1s;
+            animation: fadeIn 3s forwards 0.8s;
         }
 
+        /* ----------------------------------------
+           TIMER
+        ---------------------------------------- */
         .timer {
             font-family: var(--font-mono);
-            font-size: 18px;
-            letter-spacing: 4px;
-            opacity: 0.5;
+            font-size: clamp(13px, 4vw, 18px);
+            letter-spacing: clamp(3px, 1.5vw, 6px);
+            opacity: 0.4;
             transition: all 1s ease;
+            flex-shrink: 0;
         }
 
+        /* ----------------------------------------
+           MEMORY TEXT — THE BIG MESSAGE
+        ---------------------------------------- */
         .memory-text {
-            font-size: 22px;
+            font-size: clamp(16px, 4.5vw, 22px);
             font-weight: 300;
-            line-height: 1.6;
-            letter-spacing: 1px;
+            line-height: 1.85;
+            letter-spacing: 0.3px;
             transition: all 0.5s ease;
+            width: 100%;
+            overflow-y: auto;
+            max-height: 65vh;
+            max-height: 65dvh;
+            padding: 0 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
 
+        .memory-text::-webkit-scrollbar {
+            display: none;
+        }
+
+        .memory-text p {
+            margin-bottom: 0;
+        }
+
+        #line-1 {
+            font-style: italic;
+            font-size: clamp(17px, 4.8vw, 23px);
+            line-height: 1.9;
+            color: rgba(255,255,255,0.9);
+        }
+
+        #line-1 .salutation {
+            font-style: normal;
+            font-size: clamp(13px, 3.5vw, 16px);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.35;
+            font-family: var(--font-mono);
+            display: block;
+            margin-bottom: clamp(14px, 4vh, 24px);
+        }
+
+        .spacer {
+            display: block;
+            height: clamp(14px, 3vh, 22px);
+        }
+
+        #line-2 {
+            font-size: clamp(15px, 4vw, 19px);
+            line-height: 1.85;
+            color: rgba(255,255,255,0.75);
+            font-style: italic;
+        }
+
+        /* ----------------------------------------
+           TIMESTAMP
+        ---------------------------------------- */
         .timestamp {
             font-family: var(--font-mono);
-            font-size: 12px;
-            opacity: 0.3;
+            font-size: clamp(9px, 2.5vw, 12px);
+            opacity: 0.25;
+            flex-shrink: 0;
+            letter-spacing: 1px;
         }
 
+        /* ----------------------------------------
+           FINAL MESSAGE
+        ---------------------------------------- */
         .final-message {
-            position: absolute;
+            position: fixed;
             inset: 0;
             display: none;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            gap: clamp(10px, 3vh, 18px);
+            font-size: clamp(17px, 5vw, 24px);
             font-weight: 300;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             opacity: 0;
+            padding: clamp(24px, 8vw, 60px);
+            text-align: center;
+            line-height: 1.7;
+            font-style: italic;
         }
 
-        /* ----------------------------------------------------
-           Decay Phases & Animations
-           ---------------------------------------------------- */
+        .final-message .sub {
+            font-size: clamp(12px, 3.2vw, 16px);
+            opacity: 0.5;
+            letter-spacing: 2px;
+            font-style: normal;
+            font-family: var(--font-mono);
+        }
+
+        /* ----------------------------------------
+           DECAY PHASES & ANIMATIONS
+        ---------------------------------------- */
         @keyframes fadeIn { to { opacity: 1; } }
+
         @keyframes flicker {
-            0% { opacity: 1; }
-            5% { opacity: 0.8; }
-            10% { opacity: 1; }
-            15% { opacity: 0.3; }
-            20% { opacity: 1; }
+            0%   { opacity: 1; }
+            5%   { opacity: 0.75; }
+            10%  { opacity: 1; }
+            15%  { opacity: 0.25; }
+            20%  { opacity: 1; }
             100% { opacity: 1; }
         }
+
         @keyframes jitter {
-            0% { transform: translate(0, 0); }
-            25% { transform: translate(-1px, 1px); }
-            50% { transform: translate(1px, -1px); }
-            75% { transform: translate(-1px, -1px); }
+            0%   { transform: translate(0, 0); }
+            25%  { transform: translate(-1px, 1px); }
+            50%  { transform: translate(1px, -1px); }
+            75%  { transform: translate(-1px, -1px); }
             100% { transform: translate(1px, 1px); }
         }
 
-        /* Phase 2: Small Changes */
+        /* Phase 2 */
         body[data-phase="2"] .memory-text {
             animation: flicker 8s infinite alternate;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
         }
 
-        /* Phase 3: Decay Begins */
+        /* Phase 3 */
         body[data-phase="3"] .memory-text {
             animation: flicker 3s infinite, jitter 2s infinite;
             filter: blur(1px);
         }
         body[data-phase="3"] .timer {
-            opacity: 0.2;
-            letter-spacing: 8px;
+            opacity: 0.15;
+            letter-spacing: 10px;
         }
 
-        /* Phase 4: Panic */
+        /* Phase 4 */
         body[data-phase="4"] {
             background-color: #050505;
         }
         body[data-phase="4"] .memory-text {
             animation: flicker 0.5s infinite, jitter 0.2s infinite;
             filter: blur(3px);
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.35);
             transform: scale(0.98);
         }
         body[data-phase="4"] .timer {
@@ -162,43 +267,109 @@
             opacity: 0.5;
         }
 
-        /* Phase 5: The End */
+        /* Phase 5 */
         body[data-phase="5"] #experience-container {
-            display: none !important; /* Force hide main UI */
+            display: none !important;
         }
         body[data-phase="5"] .final-message {
             display: flex;
             animation: fadeIn 2s forwards;
         }
-        
+
+        /* ----------------------------------------
+           MOBILE TWEAKS
+        ---------------------------------------- */
+        @media (max-width: 380px) {
+            #line-1 { font-size: 15px; }
+            #line-2 { font-size: 14px; }
+            .memory-text { line-height: 1.75; }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            #experience-container {
+                min-height: 90vh;
+                padding: 12px 0;
+            }
+            .memory-text {
+                max-height: 55vh;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Gateway -->
     <div id="intro-screen">
+        <div id="intro-title">for her</div>
         <button id="enter-btn">Initiate Memory</button>
     </div>
 
     <!-- Main Experience -->
     <div id="experience-container">
         <div class="timer" id="timer-display">05:00</div>
-        
+
         <div class="memory-text" id="target-text">
+
             <p id="line-1">
-                There is a version of this evening<br>
-                I have replayed a thousand times —<br>
-                the way the light caught your eyes,<br>
-                the pause before you smiled,<br>
-                the exact warmth of that one moment<br>
-                when the whole world quietly stepped back<br>
-                and left only you and me in it.
+                <span class="salutation">— to the one who changed everything —</span>
+
+                I don't know how to explain what you do to me.<br>
+                It's not something I planned —<br>
+                it just happened, quietly, the way light<br>
+                fills a room before you notice it's morning.<br>
+                <span class="spacer"></span>
+                You have this way of existing<br>
+                that makes the rest of the world<br>
+                feel slightly less necessary.<br>
+                <span class="spacer"></span>
+                I've thought about that one moment —<br>
+                the one where I looked at you<br>
+                and something inside me said,<br>
+                <em>oh. it's her.</em><br>
+                <span class="spacer"></span>
+                And I've been a little unsteady ever since.<br>
+                Not in a bad way.<br>
+                In the way that mountains must feel<br>
+                when wind finally finds them —<br>
+                immovable, but moved.<br>
+                <span class="spacer"></span>
+                I want you to know things I haven't said yet.<br>
+                That your laugh is the kind I replay.<br>
+                That the way you care about things<br>
+                — really, deeply care —<br>
+                makes me want to be the kind of person<br>
+                worth caring about.<br>
+                <span class="spacer"></span>
+                That I notice everything.<br>
+                The way your voice drops when you're being honest.<br>
+                The way you tuck your feelings away<br>
+                before someone sees them.<br>
+                I see them.<br>
+                I always see them.<br>
+                <span class="spacer"></span>
+                If time could bend —<br>
+                I would fold it right here,<br>
+                around this feeling,<br>
+                and keep it.<br>
+                <span class="spacer"></span>
+                But since it can't —<br>
+                I'm writing it down instead.<br>
+                So at least one version of this moment<br>
+                gets to last.
             </p>
-            <br>
+
+            <span class="spacer"></span>
+            <span class="spacer"></span>
+
             <p id="line-2">
-                I wanted to live inside that feeling forever.<br>
-                I still do.
+                I don't need forever to be happy.<br>
+                I just need you — and right now —<br>
+                and this quiet, impossible feeling<br>
+                that being near you<br>
+                is exactly where I belong.
             </p>
+
         </div>
 
         <div class="timestamp" id="real-time"></div>
@@ -206,46 +377,45 @@
 
     <!-- Final State -->
     <div class="final-message" id="final-message">
-        Even if this disappears — you won't.<br>
-        <span style="font-size:16px; opacity:0.6; letter-spacing:1px;">Not from me. Not ever.</span>
+        Even if this disappears —<br>
+        you won't.<br>
+        Not from me.<br>
+        Not ever.
+        <span class="sub">— always yours</span>
     </div>
 
     <script>
-        /** 
+        /**
          * CONFIGURATION
          */
         const TOTAL_MINUTES = 0.5;
-        const LIFESPAN_MS = TOTAL_MINUTES * 60 * 1000; 
+        const LIFESPAN_MS = TOTAL_MINUTES * 60 * 1000;
 
-        // Define phase thresholds as percentages of total lifespan
         const PHASE_THRESHOLDS = {
-            2: 0.20, // 20% in (1 min)
-            3: 0.40, // 40% in (2 min)
-            4: 0.70, // 70% in (3.5 min)
-            5: 0.90  // 90% in (4.5 min)
+            2: 0.20,
+            3: 0.40,
+            4: 0.70,
+            5: 0.90
         };
 
         let currentPhase = 1;
         let animationFrameId;
-        
-        // Audio globals
+
         let audioCtx, oscillator, gainNode;
 
-        // Elements
-        const introScreen = document.getElementById('intro-screen');
-        const enterBtn = document.getElementById('enter-btn');
+        const introScreen    = document.getElementById('intro-screen');
+        const enterBtn       = document.getElementById('enter-btn');
         const experienceContainer = document.getElementById('experience-container');
-        const timerDisplay = document.getElementById('timer-display');
-        const line2 = document.getElementById('line-2');
-        const realTime = document.getElementById('real-time');
+        const timerDisplay   = document.getElementById('timer-display');
+        const line2          = document.getElementById('line-2');
+        const realTime       = document.getElementById('real-time');
 
-        // Capture real creation time
         const now = new Date();
         realTime.innerText = `Created: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
 
-        /**
-         * INITIALIZATION & AUDIO
-         */
+        /* ----------------------------------------
+           INIT
+        ---------------------------------------- */
         enterBtn.addEventListener('click', () => {
             introScreen.style.opacity = '0';
             setTimeout(() => {
@@ -258,15 +428,13 @@
         });
 
         function initAudio() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
             oscillator = audioCtx.createOscillator();
-            gainNode = audioCtx.createGain();
+            gainNode   = audioCtx.createGain();
 
-            // Create a low, ambient drone
             oscillator.type = 'sine';
-            oscillator.frequency.value = 65; // Deep hum
-            
-            // Start quiet
+            oscillator.frequency.value = 65;
+
             gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 5);
 
@@ -285,56 +453,45 @@
             }
         }
 
-        /**
-         * CORE TIMELINE LOGIC
-         */
+        /* ----------------------------------------
+           CORE TIMELINE
+        ---------------------------------------- */
         function startExperience() {
             let startTime = localStorage.getItem('memory_epoch');
-
             if (!startTime) {
                 startTime = Date.now();
                 localStorage.setItem('memory_epoch', startTime);
             } else {
                 startTime = parseInt(startTime, 10);
             }
-
             loop(startTime);
         }
 
         function loop(startTime) {
-            const elapsedMs = Date.now() - startTime;
+            const elapsedMs   = Date.now() - startTime;
             const remainingMs = LIFESPAN_MS - elapsedMs;
-
-            if (remainingMs <= 0) {
-                executeDeathState();
-                return; 
-            }
-
+            if (remainingMs <= 0) { executeDeathState(); return; }
             updateUI(remainingMs, elapsedMs);
             animationFrameId = requestAnimationFrame(() => loop(startTime));
         }
 
-        /**
-         * UI & CORRUPTION UPDATES
-         */
+        /* ----------------------------------------
+           UI & CORRUPTION
+        ---------------------------------------- */
         function updateUI(remainingMs, elapsedMs) {
-            // 1. Update Timer
             const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
             const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
             const s = String(totalSeconds % 60).padStart(2, '0');
-            
-            // In panic phase, timer glitches visually
+
             if (currentPhase === 4 && Math.random() > 0.8) {
                 timerDisplay.innerText = `${m}:${String(Math.floor(Math.random() * 99)).padStart(2, '0')}`;
             } else {
                 timerDisplay.innerText = `${m}:${s}`;
             }
 
-            // 2. Evaluate Phase
             const progress = elapsedMs / LIFESPAN_MS;
             let newPhase = 1;
-            
-            if (progress >= PHASE_THRESHOLDS[5]) newPhase = 5;
+            if      (progress >= PHASE_THRESHOLDS[5]) newPhase = 5;
             else if (progress >= PHASE_THRESHOLDS[4]) newPhase = 4;
             else if (progress >= PHASE_THRESHOLDS[3]) newPhase = 3;
             else if (progress >= PHASE_THRESHOLDS[2]) newPhase = 2;
@@ -345,14 +502,10 @@
                 triggerPhaseEvents(currentPhase);
             }
 
-            // 3. Continuous Audio Deterioration
             if (audioCtx && progress > PHASE_THRESHOLDS[2]) {
-                // Drop frequency slowly to sound unstable
                 const baseFreq = 65;
-                const drop = (progress * 20);
+                const drop     = progress * 20;
                 oscillator.frequency.setTargetAtTime(baseFreq - drop, audioCtx.currentTime, 0.1);
-                
-                // Add volume stutter in phase 4
                 if (currentPhase === 4 && Math.random() > 0.9) {
                     gainNode.gain.setTargetAtTime(Math.random() * 0.1, audioCtx.currentTime, 0.05);
                 }
@@ -361,53 +514,52 @@
 
         function triggerPhaseEvents(phase) {
             if (phase === 3) {
-                // Irreversibly drop sentence
                 setTimeout(() => {
-                    line2.innerText = "I wanted to live inside that feeling...";
+                    line2.innerText = "I don't need forever...\nI just need you.";
                 }, 2000);
                 setTimeout(() => {
-                    line2.remove(); // Removed from DOM permanently
+                    line2.remove();
                 }, 8000);
             }
             if (phase === 5) {
-                // Fade out audio entirely
                 if (gainNode) {
                     gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
                     setTimeout(() => audioCtx.close(), 3500);
                 }
-                
-                // Final script sequence before absolute death
                 setTimeout(() => {
                     const fm = document.getElementById('final-message');
-                    fm.style.opacity = '0';
-                    setTimeout(() => fm.remove(), 2000);
-                }, 8000); // Leaves a few seconds of pure black before system halt
+                    if (fm) {
+                        fm.style.transition = 'opacity 2s ease';
+                        fm.style.opacity    = '0';
+                        setTimeout(() => fm.remove(), 2000);
+                    }
+                }, 8000);
             }
         }
 
-        /**
-         * THE DEATH STATE
-         */
+        /* ----------------------------------------
+           DEATH STATE
+        ---------------------------------------- */
         function executeDeathState() {
             cancelAnimationFrame(animationFrameId);
             if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
 
-            document.body.innerHTML = '';
-            document.body.className = '';
+            document.body.innerHTML         = '';
+            document.body.className         = '';
             document.body.style.backgroundColor = '#000000';
-            document.body.style.margin = '0';
-            document.body.style.height = '100vh';
-            document.body.style.display = 'flex';
-            document.body.style.alignItems = 'center';
+            document.body.style.margin      = '0';
+            document.body.style.height      = '100vh';
+            document.body.style.display     = 'flex';
+            document.body.style.alignItems  = 'center';
             document.body.style.justifyContent = 'center';
 
-            const voidMsg = document.createElement('div');
-            voidMsg.style.color = 'rgba(255, 255, 255, 0.1)';
-            voidMsg.style.fontFamily = "monospace";
-            voidMsg.style.fontSize = "10px";
-            voidMsg.style.textTransform = "uppercase";
-            voidMsg.innerText = 'Memory Expired';
-            
+            const voidMsg             = document.createElement('div');
+            voidMsg.style.color       = 'rgba(255, 255, 255, 0.08)';
+            voidMsg.style.fontFamily  = 'monospace';
+            voidMsg.style.fontSize    = '10px';
+            voidMsg.style.textTransform = 'uppercase';
+            voidMsg.style.letterSpacing = '3px';
+            voidMsg.innerText         = 'Memory Expired';
             document.body.appendChild(voidMsg);
         }
     </script>
