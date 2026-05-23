@@ -8,16 +8,12 @@
     <style>
         :root {
             --bg: #000000;
-            --text-glow: rgba(255, 255, 255, 0.85);
+            --text-glow: rgba(255, 255, 255, 0.88);
             --font-main: 'Cormorant Garamond', 'Georgia', serif;
             --font-mono: 'Courier Prime', 'Courier New', monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
             height: 100%;
@@ -35,12 +31,10 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            transition: background-color 2s ease, filter 2s ease;
+            transition: background-color 2s ease;
         }
 
-        /* ----------------------------------------
-           INTRO SCREEN
-        ---------------------------------------- */
+        /* ── INTRO ─────────────────────────────────── */
         #intro-screen {
             position: fixed;
             inset: 0;
@@ -51,26 +45,23 @@
             background: #000;
             z-index: 100;
             transition: opacity 2s ease;
-            padding: 20px;
-            text-align: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         #intro-title {
-            font-size: clamp(11px, 3vw, 13px);
+            font-size: clamp(10px, 3vw, 13px);
             letter-spacing: 5px;
             text-transform: uppercase;
-            opacity: 0.25;
+            opacity: 0.22;
             font-family: var(--font-mono);
-            margin-bottom: 8px;
         }
 
         #enter-btn {
             background: none;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: rgba(255, 255, 255, 0.55);
-            padding: clamp(10px, 3vw, 14px) clamp(20px, 6vw, 30px);
-            font-size: clamp(11px, 3vw, 13px);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.55);
+            padding: clamp(10px,3vw,14px) clamp(22px,6vw,32px);
+            font-size: clamp(11px,3vw,13px);
             letter-spacing: 3px;
             cursor: pointer;
             text-transform: uppercase;
@@ -80,113 +71,131 @@
             touch-action: manipulation;
         }
 
-        #enter-btn:hover,
         #enter-btn:active {
             color: #fff;
-            border-color: rgba(255, 255, 255, 0.7);
+            border-color: rgba(255,255,255,0.7);
             box-shadow: 0 0 18px rgba(255,255,255,0.12);
         }
 
-        /* ----------------------------------------
-           EXPERIENCE CONTAINER
-        ---------------------------------------- */
+        /* ── EXPERIENCE WRAPPER ────────────────────── */
         #experience-container {
             display: none;
+            position: fixed;
+            inset: 0;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            width: 90%;
-            max-width: 640px;
-            min-height: 80vh;
-            min-height: 80dvh;
-            padding: clamp(20px, 6vh, 50px) 0;
-            text-align: center;
             opacity: 0;
-            animation: fadeIn 3s forwards 0.8s;
+            animation: fadeIn 3s forwards 0.6s;
         }
 
-        /* ----------------------------------------
-           TIMER
-        ---------------------------------------- */
+        /* ── TIMER — fixed top ─────────────────────── */
         .timer {
+            position: absolute;
+            top: clamp(16px,4vh,30px);
+            left: 50%;
+            transform: translateX(-50%);
             font-family: var(--font-mono);
-            font-size: clamp(13px, 4vw, 18px);
-            letter-spacing: clamp(3px, 1.5vw, 6px);
-            opacity: 0.4;
+            font-size: clamp(13px,4vw,17px);
+            letter-spacing: clamp(3px,1.5vw,6px);
+            opacity: 0.38;
             transition: all 1s ease;
-            flex-shrink: 0;
+            white-space: nowrap;
+            z-index: 10;
         }
 
-        /* ----------------------------------------
-           MEMORY TEXT — THE BIG MESSAGE
-        ---------------------------------------- */
-        .memory-text {
-            font-size: clamp(16px, 4.5vw, 22px);
-            font-weight: 300;
-            line-height: 1.85;
-            letter-spacing: 0.3px;
-            transition: all 0.5s ease;
+        /* ── TIMESTAMP — fixed bottom ──────────────── */
+        .timestamp {
+            position: absolute;
+            bottom: clamp(14px,3vh,24px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: clamp(9px,2.5vw,11px);
+            opacity: 0.2;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        /* ── SCROLL VIEWPORT ───────────────────────── */
+        #scroll-viewport {
+            position: absolute;
+            top: clamp(55px,11vh,80px);
+            bottom: clamp(40px,8vh,60px);
+            left: 0;
+            right: 0;
+            overflow: hidden;           /* hides scrollbar, JS does scrolling */
+        }
+
+        /* fade masks top & bottom so text dissolves softly */
+        #scroll-viewport::before,
+        #scroll-viewport::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: clamp(40px,8vh,70px);
+            z-index: 2;
+            pointer-events: none;
+        }
+        #scroll-viewport::before {
+            top: 0;
+            background: linear-gradient(to bottom, #000 0%, transparent 100%);
+        }
+        #scroll-viewport::after {
+            bottom: 0;
+            background: linear-gradient(to top, #000 0%, transparent 100%);
+        }
+
+        /* ── SCROLLING TRACK ───────────────────────── */
+        #scroll-track {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 100%;
-            overflow-y: auto;
-            max-height: 65vh;
-            max-height: 65dvh;
-            padding: 0 4px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
+            padding: 0 clamp(22px,7vw,60px);
+            /* starts below viewport so text scrolls UP into view */
+            transform: translateY(100vh);
         }
 
-        .memory-text::-webkit-scrollbar {
-            display: none;
-        }
-
-        .memory-text p {
-            margin-bottom: 0;
-        }
-
-        #line-1 {
+        /* ── MEMORY TEXT ───────────────────────────── */
+        .memory-text {
+            width: 100%;
+            max-width: 560px;
+            text-align: center;
+            font-size: clamp(17px,4.8vw,23px);
+            font-weight: 300;
+            line-height: 1.95;
+            letter-spacing: 0.3px;
             font-style: italic;
-            font-size: clamp(17px, 4.8vw, 23px);
-            line-height: 1.9;
-            color: rgba(255,255,255,0.9);
         }
 
-        #line-1 .salutation {
+        .salutation {
             font-style: normal;
-            font-size: clamp(13px, 3.5vw, 16px);
+            font-size: clamp(12px,3.2vw,15px);
             letter-spacing: 3px;
             text-transform: uppercase;
-            opacity: 0.35;
+            opacity: 0.3;
             font-family: var(--font-mono);
             display: block;
-            margin-bottom: clamp(14px, 4vh, 24px);
+            margin-bottom: clamp(18px,5vh,30px);
         }
 
         .spacer {
             display: block;
-            height: clamp(14px, 3vh, 22px);
+            height: clamp(16px,3.5vh,26px);
         }
 
         #line-2 {
-            font-size: clamp(15px, 4vw, 19px);
-            line-height: 1.85;
-            color: rgba(255,255,255,0.75);
-            font-style: italic;
+            font-size: clamp(15px,4.2vw,20px);
+            opacity: 0.78;
+            margin-top: clamp(10px,2.5vh,18px);
         }
 
-        /* ----------------------------------------
-           TIMESTAMP
-        ---------------------------------------- */
-        .timestamp {
-            font-family: var(--font-mono);
-            font-size: clamp(9px, 2.5vw, 12px);
-            opacity: 0.25;
-            flex-shrink: 0;
-            letter-spacing: 1px;
+        /* trailing space so last line scrolls fully into view */
+        .end-padding {
+            height: 50vh;
         }
 
-        /* ----------------------------------------
-           FINAL MESSAGE
-        ---------------------------------------- */
+        /* ── FINAL MESSAGE ─────────────────────────── */
         .final-message {
             position: fixed;
             inset: 0;
@@ -194,374 +203,365 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: clamp(10px, 3vh, 18px);
-            font-size: clamp(17px, 5vw, 24px);
+            gap: clamp(10px,3vh,18px);
+            font-size: clamp(18px,5.5vw,26px);
             font-weight: 300;
             letter-spacing: 1.5px;
             opacity: 0;
-            padding: clamp(24px, 8vw, 60px);
+            padding: clamp(28px,8vw,70px);
             text-align: center;
-            line-height: 1.7;
+            line-height: 1.8;
             font-style: italic;
         }
-
         .final-message .sub {
-            font-size: clamp(12px, 3.2vw, 16px);
-            opacity: 0.5;
-            letter-spacing: 2px;
+            font-size: clamp(11px,3vw,14px);
+            opacity: 0.4;
+            letter-spacing: 3px;
             font-style: normal;
             font-family: var(--font-mono);
+            margin-top: 6px;
         }
 
-        /* ----------------------------------------
-           DECAY PHASES & ANIMATIONS
-        ---------------------------------------- */
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        @keyframes flicker {
-            0%   { opacity: 1; }
-            5%   { opacity: 0.75; }
-            10%  { opacity: 1; }
-            15%  { opacity: 0.25; }
-            20%  { opacity: 1; }
-            100% { opacity: 1; }
+        /* ── ANIMATIONS ────────────────────────────── */
+        @keyframes fadeIn   { to { opacity: 1; } }
+        @keyframes flicker  {
+            0%  { opacity: 1; } 5% { opacity: 0.7; } 10% { opacity: 1; }
+            15% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 1; }
         }
-
         @keyframes jitter {
-            0%   { transform: translate(0, 0); }
-            25%  { transform: translate(-1px, 1px); }
-            50%  { transform: translate(1px, -1px); }
-            75%  { transform: translate(-1px, -1px); }
-            100% { transform: translate(1px, 1px); }
+            0%  { transform: translateY(var(--ty)) translate(0,0); }
+            25% { transform: translateY(var(--ty)) translate(-1px,1px); }
+            50% { transform: translateY(var(--ty)) translate(1px,-1px); }
+            75% { transform: translateY(var(--ty)) translate(-1px,-1px); }
+            100%{ transform: translateY(var(--ty)) translate(1px,1px); }
         }
 
         /* Phase 2 */
         body[data-phase="2"] .memory-text {
             animation: flicker 8s infinite alternate;
-            text-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+            text-shadow: 0 0 6px rgba(255,255,255,0.15);
         }
-
         /* Phase 3 */
         body[data-phase="3"] .memory-text {
-            animation: flicker 3s infinite, jitter 2s infinite;
+            animation: flicker 3s infinite;
             filter: blur(1px);
         }
-        body[data-phase="3"] .timer {
-            opacity: 0.15;
-            letter-spacing: 10px;
-        }
-
+        body[data-phase="3"] .timer { opacity: 0.12; letter-spacing: 10px; }
         /* Phase 4 */
-        body[data-phase="4"] {
-            background-color: #050505;
-        }
+        body[data-phase="4"] { background-color: #050505; }
         body[data-phase="4"] .memory-text {
-            animation: flicker 0.5s infinite, jitter 0.2s infinite;
+            animation: flicker 0.5s infinite;
             filter: blur(3px);
-            color: rgba(255, 255, 255, 0.35);
-            transform: scale(0.98);
+            color: rgba(255,255,255,0.35);
         }
         body[data-phase="4"] .timer {
-            animation: jitter 0.1s infinite;
             color: red;
             opacity: 0.5;
+            animation: flicker 0.2s infinite;
         }
-
         /* Phase 5 */
-        body[data-phase="5"] #experience-container {
-            display: none !important;
-        }
+        body[data-phase="5"] #experience-container { display: none !important; }
         body[data-phase="5"] .final-message {
             display: flex;
             animation: fadeIn 2s forwards;
-        }
-
-        /* ----------------------------------------
-           MOBILE TWEAKS
-        ---------------------------------------- */
-        @media (max-width: 380px) {
-            #line-1 { font-size: 15px; }
-            #line-2 { font-size: 14px; }
-            .memory-text { line-height: 1.75; }
-        }
-
-        @media (max-height: 600px) and (orientation: landscape) {
-            #experience-container {
-                min-height: 90vh;
-                padding: 12px 0;
-            }
-            .memory-text {
-                max-height: 55vh;
-                font-size: 14px;
-            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Gateway -->
-    <div id="intro-screen">
-        <div id="intro-title">for her</div>
-        <button id="enter-btn">Initiate Memory</button>
-    </div>
+<!-- INTRO -->
+<div id="intro-screen">
+    <div id="intro-title">for her</div>
+    <button id="enter-btn">Initiate Memory</button>
+</div>
 
-    <!-- Main Experience -->
-    <div id="experience-container">
-        <div class="timer" id="timer-display">05:00</div>
+<!-- EXPERIENCE -->
+<div id="experience-container">
+    <div class="timer" id="timer-display">05:00</div>
 
-        <div class="memory-text" id="target-text">
+    <div id="scroll-viewport">
+        <div id="scroll-track">
 
-            <p id="line-1">
-                <span class="salutation">— I'm Sorrrrrrryyyyyy Saraaaa❤ —</span>
+            <div class="memory-text" id="target-text">
 
-                Maine jo bhi kiyaaa tumse pucha nhi.<br>
-               Tumko wqt nhi diyaa tumse durr rha uss wqt jb—<br>
-                Tumhe zurrt thi sorrrryyy uske liyee<br>
-                M tumse pyrrr krta hu saraaaa❤.<br>
-                <span class="spacer"></span>
-                Kbhi tumse alaagg nhi hona chta<br>
-                Tumhre sth wohh raat orr subh dekhna h<br>
-                Jiska hum itne wqt s intezr kr rhee h.<br>
-                <span class="spacer"></span>
-                Wohh mnzil dekhna h —<br>
-                Jiske liyee hum yehh sfr kr rhe h<br>
-                Saraaaa❤<br>
-                <em>I'm Sorrrrrryyyyyyyy.</em><br>
-                <span class="spacer"></span>
-                Tum meri jaaaaannnn❤ ho.<br>
-                Meri pyrriii bcchi ho💖.<br>
-                Meri pyriii biwi ho💕<br>
-                Mera sukoonnn ho💓—<br>
-                Meri zindgi ho❣.<br>
-                <span class="spacer"></span>
-                I'm sorrrryyyyyyyyy sorrrryyyyyyy💝.<br>
-                Tumhre sth m bht khussshhh hu.<br>
-               Meri zindgi ho tummmm<br>
-               Meri hr chizz tumse h<br>
-                makes me want to be the kind of person<br>
-                worth caring about.<br>
-                <span class="spacer"></span>
-                That I notice everything.<br>
-                The way your voice drops when you're being honest.<br>
-                The way you tuck your feelings away<br>
-                before someone sees them.<br>
-                I see them.<br>
-                I always see them.<br>
-                <span class="spacer"></span>
-                If time could bend —<br>
-                I would fold it right here,<br>
-                around this feeling,<br>
-                and keep it.<br>
-                <span class="spacer"></span>
-                But since it can't —<br>
-                I'm writing it down instead.<br>
-                So at least one version of this moment<br>
-                gets to last.
-            </p>
+                <p id="line-1">
+                    <span class="salutation">— I'm Sorrrrrrryyyyyy Saraaaa ❤ —</span>
 
-            <span class="spacer"></span>
-            <span class="spacer"></span>
+                    Maine jo bhi kiyaa tumse pucha nhi.<br>
+                    Tumko waqt nhi diyaa,<br>
+                    tumse durr rha uss waqt jab<br>
+                    tumhe zaroorat thi —<br>
+                    Sorry uske liye.<br>
 
-            <p id="line-2">
-                I don't need forever to be happy.<br>
-                I just need you — and right now —<br>
-                and this quiet, impossible feeling<br>
-                that being near you<br>
-                is exactly where I belong.
-            </p>
+                    <span class="spacer"></span>
 
+                    Main tumse pyaar karta hu Saraaaa ❤<br>
+                    Is duniya mein koi cheez nahi<br>
+                    jo tumhari jagah le sake mere dil mein.<br>
+
+                    <span class="spacer"></span>
+
+                    Kabhi tumse alag nhi hona chahta —<br>
+                    tumhare saath woh raat aur subah dekhna hai<br>
+                    jiska hum itne waqt se intezaar kar rahe hain.<br>
+
+                    <span class="spacer"></span>
+
+                    Tumhara chehra, tumhari aawaz,<br>
+                    woh ek pal jab tum muskurati ho —<br>
+                    woh sab mujhe yaad rehta hai.<br>
+                    Sab kuch.<br>
+
+                    <span class="spacer"></span>
+
+                    Mujhe pata hai maine galtiyan ki hain.<br>
+                    Maine tumhe woh time nahi diya<br>
+                    jo tumhara haq tha.<br>
+                    Maine socha tha tum samjhogi —<br>
+                    par mujhe bolna chahiye tha.<br>
+                    Khulke bolna chahiye tha.<br>
+
+                    <span class="spacer"></span>
+
+                    Ab main yeh waada karta hun —<br>
+                    ki jo bhi hoga pehle tumse puchunga,<br>
+                    tumhare saath rahunga,<br>
+                    tumhare liye waqt nikalunga —<br>
+                    chahe kuch bhi ho.<br>
+
+                    <span class="spacer"></span>
+
+                    Kyunki tum sirf meri Sara nahi ho —<br>
+                    tum meri subah ho, meri raat ho,<br>
+                    mera sabse pehla khayaal ho<br>
+                    aur sabse aakhri bhi.<br>
+
+                    <span class="spacer"></span>
+
+                    Agar waqt palta ja sakta —<br>
+                    toh main har woh pal badal deta<br>
+                    jisme maine tumhe hurt kiya.<br>
+                    Par ab yeh pal hai —<br>
+                    aur is pal mein main sirf tumhara hun.<br>
+
+                    <span class="spacer"></span>
+
+                    Maafi maango ya na maano —<br>
+                    mera pyaar kabhi kam nahi hoga.<br>
+                    Tum iss dil ki aadat ban gayi ho,<br>
+                    aur aadat nahi jaati, Sara.<br>
+                    Woh rehti hai.<br>
+                    Hamesha.
+                </p>
+
+                <span class="spacer"></span>
+                <span class="spacer"></span>
+
+                <p id="line-2">
+                    Main tumse alag nahi hona chahta.<br>
+                    Bas tumhare saath rehna chahta hun —<br>
+                    tumhari aankhon mein dekh ke yeh kehna chahta hun<br>
+                    ki tum hi meri jagah ho.<br>
+                    Tum hi mera ghar ho. ❤
+                </p>
+
+            </div>
+
+            <div class="end-padding"></div>
         </div>
-
-        <div class="timestamp" id="real-time"></div>
     </div>
 
-    <!-- Final State -->
-    <div class="final-message" id="final-message">
-        Even if this disappears —<br>
-        you won't.<br>
-        Not from me.<br>
-        Not ever.
-        <span class="sub">— always yours</span>
-    </div>
+    <div class="timestamp" id="real-time"></div>
+</div>
 
-    <script>
-        /**
-         * CONFIGURATION
-         */
-        const TOTAL_MINUTES = 5;
-        const LIFESPAN_MS = TOTAL_MINUTES * 60 * 1000;
+<!-- FINAL -->
+<div class="final-message" id="final-message">
+    Yeh yaad mit jaaye —<br>
+    par tum nahi mitogi.<br>
+    Mere dil se. Kabhi nahi. ❤
+    <span class="sub">— hamesha tumhara</span>
+</div>
 
-        const PHASE_THRESHOLDS = {
-            2: 0.20,
-            3: 0.40,
-            4: 0.70,
-            5: 0.90
-        };
+<script>
+    /* ── CONFIG ─────────────────────────────────── */
+    const TOTAL_MINUTES = 5;
+    const LIFESPAN_MS   = TOTAL_MINUTES * 60 * 1000;
 
-        let currentPhase = 1;
-        let animationFrameId;
+    const PHASE_THRESHOLDS = { 2: 0.20, 3: 0.40, 4: 0.70, 5: 0.90 };
 
-        let audioCtx, oscillator, gainNode;
+    let currentPhase    = 1;
+    let animationFrameId;
+    let audioCtx, oscillator, gainNode;
+    let scrollStarted   = false;
+    let scrollRafId     = null;
 
-        const introScreen    = document.getElementById('intro-screen');
-        const enterBtn       = document.getElementById('enter-btn');
-        const experienceContainer = document.getElementById('experience-container');
-        const timerDisplay   = document.getElementById('timer-display');
-        const line2          = document.getElementById('line-2');
-        const realTime       = document.getElementById('real-time');
+    const introScreen         = document.getElementById('intro-screen');
+    const enterBtn            = document.getElementById('enter-btn');
+    const experienceContainer = document.getElementById('experience-container');
+    const timerDisplay        = document.getElementById('timer-display');
+    const line2               = document.getElementById('line-2');
+    const realTime            = document.getElementById('real-time');
+    const scrollTrack         = document.getElementById('scroll-track');
 
-        const now = new Date();
-        realTime.innerText = `Created: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    const now = new Date();
+    realTime.innerText = `Created: ${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
 
-        /* ----------------------------------------
-           INIT
-        ---------------------------------------- */
-        enterBtn.addEventListener('click', () => {
-            introScreen.style.opacity = '0';
+    /* ── ENTER ─────────────────────────────────── */
+    enterBtn.addEventListener('click', () => {
+        introScreen.style.opacity = '0';
+        setTimeout(() => {
+            introScreen.remove();
+            experienceContainer.style.display = 'flex';
+            initAudio();
+            startExperience();
+            requestWakeLock();
+        }, 2000);
+    });
+
+    /* ── AUDIO ─────────────────────────────────── */
+    function initAudio() {
+        audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        gainNode   = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 65;
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 5);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+    }
+
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
+        } catch(e) {}
+    }
+
+    /* ── AUTO-SCROLL ────────────────────────────── */
+    /*
+     * Scrolls the track from translateY(100vh) → translateY(-totalHeight)
+     * over LIFESPAN_MS milliseconds so the ENTIRE message plays
+     * exactly once, ending just as the timer hits zero.
+     */
+    function startAutoScroll(startTime) {
+        const viewport     = document.getElementById('scroll-viewport');
+        const viewH        = viewport.clientHeight;
+        const trackH       = scrollTrack.scrollHeight;
+
+        // total pixels to travel: start (viewH) + full content height
+        const totalTravel  = viewH + trackH;
+
+        // px per ms → full travel over LIFESPAN_MS
+        const speed        = totalTravel / LIFESPAN_MS;
+
+        function frame() {
+            if (currentPhase >= 5) return;
+            const elapsed  = Date.now() - startTime;
+            const px       = Math.min(elapsed * speed, totalTravel);
+            const translateY = viewH - px;
+            scrollTrack.style.transform = `translateY(${translateY}px)`;
+            scrollRafId = requestAnimationFrame(frame);
+        }
+        scrollRafId = requestAnimationFrame(frame);
+    }
+
+    /* ── TIMELINE ───────────────────────────────── */
+    function startExperience() {
+        let startTime = localStorage.getItem('memory_epoch');
+        if (!startTime) {
+            startTime = Date.now();
+            localStorage.setItem('memory_epoch', startTime);
+        } else {
+            startTime = parseInt(startTime, 10);
+        }
+        startAutoScroll(startTime);
+        loop(startTime);
+    }
+
+    function loop(startTime) {
+        const elapsedMs   = Date.now() - startTime;
+        const remainingMs = LIFESPAN_MS - elapsedMs;
+        if (remainingMs <= 0) { executeDeathState(); return; }
+        updateUI(remainingMs, elapsedMs);
+        animationFrameId = requestAnimationFrame(() => loop(startTime));
+    }
+
+    /* ── UI / CORRUPTION ────────────────────────── */
+    function updateUI(remainingMs, elapsedMs) {
+        const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+        const m = String(Math.floor(totalSec / 60)).padStart(2,'0');
+        const s = String(totalSec % 60).padStart(2,'0');
+
+        if (currentPhase === 4 && Math.random() > 0.8) {
+            timerDisplay.innerText = `${m}:${String(Math.floor(Math.random()*99)).padStart(2,'0')}`;
+        } else {
+            timerDisplay.innerText = `${m}:${s}`;
+        }
+
+        const progress = elapsedMs / LIFESPAN_MS;
+        let newPhase   = 1;
+        if      (progress >= PHASE_THRESHOLDS[5]) newPhase = 5;
+        else if (progress >= PHASE_THRESHOLDS[4]) newPhase = 4;
+        else if (progress >= PHASE_THRESHOLDS[3]) newPhase = 3;
+        else if (progress >= PHASE_THRESHOLDS[2]) newPhase = 2;
+
+        if (newPhase !== currentPhase) {
+            currentPhase = newPhase;
+            document.body.setAttribute('data-phase', currentPhase);
+            triggerPhaseEvents(currentPhase);
+        }
+
+        if (audioCtx && progress > PHASE_THRESHOLDS[2]) {
+            oscillator.frequency.setTargetAtTime(65 - progress * 20, audioCtx.currentTime, 0.1);
+            if (currentPhase === 4 && Math.random() > 0.9) {
+                gainNode.gain.setTargetAtTime(Math.random() * 0.1, audioCtx.currentTime, 0.05);
+            }
+        }
+    }
+
+    function triggerPhaseEvents(phase) {
+        if (phase === 3) {
             setTimeout(() => {
-                introScreen.remove();
-                experienceContainer.style.display = 'flex';
-                initAudio();
-                startExperience();
-                requestWakeLock();
+                if (line2) line2.innerHTML = 'Tumse alag nahi hona chahta...<br>Bas tumhara rehna chahta hun.';
             }, 2000);
+            setTimeout(() => { if (line2) line2.remove(); }, 8000);
+        }
+        if (phase === 5) {
+            cancelAnimationFrame(scrollRafId);
+            if (gainNode) {
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
+                setTimeout(() => audioCtx.close(), 3500);
+            }
+            setTimeout(() => {
+                const fm = document.getElementById('final-message');
+                if (fm) {
+                    fm.style.transition = 'opacity 2s ease';
+                    fm.style.opacity    = '0';
+                    setTimeout(() => fm.remove(), 2000);
+                }
+            }, 8000);
+        }
+    }
+
+    /* ── DEATH STATE ────────────────────────────── */
+    function executeDeathState() {
+        cancelAnimationFrame(animationFrameId);
+        cancelAnimationFrame(scrollRafId);
+        if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
+        localStorage.removeItem('memory_epoch');
+
+        document.body.innerHTML = '';
+        Object.assign(document.body.style, {
+            backgroundColor: '#000', margin: '0',
+            height: '100vh', display: 'flex',
+            alignItems: 'center', justifyContent: 'center'
         });
-
-        function initAudio() {
-            audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-            oscillator = audioCtx.createOscillator();
-            gainNode   = audioCtx.createGain();
-
-            oscillator.type = 'sine';
-            oscillator.frequency.value = 65;
-
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 5);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-        }
-
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    await navigator.wakeLock.request('screen');
-                }
-            } catch (err) {
-                console.log('Wake Lock denied:', err);
-            }
-        }
-
-        /* ----------------------------------------
-           CORE TIMELINE
-        ---------------------------------------- */
-        function startExperience() {
-            let startTime = localStorage.getItem('memory_epoch');
-            if (!startTime) {
-                startTime = Date.now();
-                localStorage.setItem('memory_epoch', startTime);
-            } else {
-                startTime = parseInt(startTime, 10);
-            }
-            loop(startTime);
-        }
-
-        function loop(startTime) {
-            const elapsedMs   = Date.now() - startTime;
-            const remainingMs = LIFESPAN_MS - elapsedMs;
-            if (remainingMs <= 0) { executeDeathState(); return; }
-            updateUI(remainingMs, elapsedMs);
-            animationFrameId = requestAnimationFrame(() => loop(startTime));
-        }
-
-        /* ----------------------------------------
-           UI & CORRUPTION
-        ---------------------------------------- */
-        function updateUI(remainingMs, elapsedMs) {
-            const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
-            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const s = String(totalSeconds % 60).padStart(2, '0');
-
-            if (currentPhase === 4 && Math.random() > 0.8) {
-                timerDisplay.innerText = `${m}:${String(Math.floor(Math.random() * 99)).padStart(2, '0')}`;
-            } else {
-                timerDisplay.innerText = `${m}:${s}`;
-            }
-
-            const progress = elapsedMs / LIFESPAN_MS;
-            let newPhase = 1;
-            if      (progress >= PHASE_THRESHOLDS[5]) newPhase = 5;
-            else if (progress >= PHASE_THRESHOLDS[4]) newPhase = 4;
-            else if (progress >= PHASE_THRESHOLDS[3]) newPhase = 3;
-            else if (progress >= PHASE_THRESHOLDS[2]) newPhase = 2;
-
-            if (newPhase !== currentPhase) {
-                currentPhase = newPhase;
-                document.body.setAttribute('data-phase', currentPhase);
-                triggerPhaseEvents(currentPhase);
-            }
-
-            if (audioCtx && progress > PHASE_THRESHOLDS[2]) {
-                const baseFreq = 65;
-                const drop     = progress * 20;
-                oscillator.frequency.setTargetAtTime(baseFreq - drop, audioCtx.currentTime, 0.1);
-                if (currentPhase === 4 && Math.random() > 0.9) {
-                    gainNode.gain.setTargetAtTime(Math.random() * 0.1, audioCtx.currentTime, 0.05);
-                }
-            }
-        }
-
-        function triggerPhaseEvents(phase) {
-            if (phase === 3) {
-                setTimeout(() => {
-                    line2.innerText = "I don't need forever...\nI just need you.";
-                }, 2000);
-                setTimeout(() => {
-                    line2.remove();
-                }, 8000);
-            }
-            if (phase === 5) {
-                if (gainNode) {
-                    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
-                    setTimeout(() => audioCtx.close(), 3500);
-                }
-                setTimeout(() => {
-                    const fm = document.getElementById('final-message');
-                    if (fm) {
-                        fm.style.transition = 'opacity 2s ease';
-                        fm.style.opacity    = '0';
-                        setTimeout(() => fm.remove(), 2000);
-                    }
-                }, 8000);
-            }
-        }
-
-        /* ----------------------------------------
-           DEATH STATE
-        ---------------------------------------- */
-        function executeDeathState() {
-            cancelAnimationFrame(animationFrameId);
-            if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
-
-            document.body.innerHTML         = '';
-            document.body.className         = '';
-            document.body.style.backgroundColor = '#000000';
-            document.body.style.margin      = '0';
-            document.body.style.height      = '100vh';
-            document.body.style.display     = 'flex';
-            document.body.style.alignItems  = 'center';
-            document.body.style.justifyContent = 'center';
-
-            const voidMsg             = document.createElement('div');
-            voidMsg.style.color       = 'rgba(255, 255, 255, 0.08)';
-            voidMsg.style.fontFamily  = 'monospace';
-            voidMsg.style.fontSize    = '10px';
-            voidMsg.style.textTransform = 'uppercase';
-            voidMsg.style.letterSpacing = '3px';
-            voidMsg.innerText         = 'Memory Expired';
-            document.body.appendChild(voidMsg);
-        }
-    </script>
+        const v = document.createElement('div');
+        v.style.cssText = 'color:rgba(255,255,255,0.08);font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:3px;';
+        v.innerText = 'Memory Expired';
+        document.body.appendChild(v);
+    }
+</script>
 </body>
 </html>
